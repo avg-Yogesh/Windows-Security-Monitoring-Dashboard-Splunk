@@ -1,6 +1,6 @@
 # Total Authentication Attempts
 
-### Purpose
+#### Purpose
 
 Displays the total number of authentication attempts observed in Windows Security Logs.
 
@@ -30,12 +30,12 @@ host="window10-Target" source="WinEventLog:Security" EventCode=4624 | stats coun
 
 # Accounts Lockout
 
-## Purpose
+### Purpose
 
 Displays all the Accounts lockout observed in Windows Security Logs.
 
 
-## SPL Query
+### SPL Query
 host="window10-Target" source="WinEventLog:Security" EventCode=4740 | stats count as "Account Lockouts"
 
 # Authentication Activity Trend
