@@ -37,9 +37,9 @@ The dashboard contains **21 security monitoring panels** covering Windows Securi
 
 | Component | Technology Used |
 |-----------|-----------------|
-| SIEM | Splunk Enterprise 10.x |
+| SIEM | Splunk Enterprise 10.4.0|
 | Log Collection | Splunk Universal Forwarder |
-| Endpoint | Windows 10 |
+| Endpoint | Windows 10 Home |
 | Attacker Machine | Kali Linux |
 | Additional Logging | Sysmon |
 | Virtualization | Oracle VirtualBox |
@@ -72,3 +72,14 @@ The dashboard contains **21 security monitoring panels** covering Windows Securi
       Windows Security Monitoring Dashboard
 
 ```
+
+## Tools Used
+
+- Splunk Enterprise 10.4.0 version
+- Splunk Universal Forwarder
+- Sysmon
+- Windows Event Viewer
+- Kali Linux
+- VirtualBox
+- PowerShell
+- Command Prompt
