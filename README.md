@@ -32,3 +32,43 @@ The dashboard contains **21 security monitoring panels** covering Windows Securi
 ### Threat Detection
 - Potential Brute Force Detection
 - Multiple Users Targeted from Same Source IP
+
+# Lab Environment
+
+| Component | Technology Used |
+|-----------|-----------------|
+| SIEM | Splunk Enterprise 10.x |
+| Log Collection | Splunk Universal Forwarder |
+| Endpoint | Windows 10 |
+| Attacker Machine | Kali Linux |
+| Additional Logging | Sysmon |
+| Virtualization | Oracle VirtualBox |
+| Operating System (SIEM) | Ubuntu Linux |
+
+---
+
+## Network Topology
+
+```
+
+                Kali Linux
+             (Attack Machine)
+                      │
+                      │
+        Brute Force / SMB / RDP / PowerShell
+                      │
+                      ▼
+             Windows 10 Target
+      Windows Security Logs + Sysmon
+                      │
+          Splunk Universal Forwarder
+                      │
+                  TCP Port 9997
+                      │
+                      ▼
+          Ubuntu - Splunk Enterprise
+                      │
+                      ▼
+      Windows Security Monitoring Dashboard
+
+```
