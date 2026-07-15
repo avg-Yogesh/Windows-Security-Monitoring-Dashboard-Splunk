@@ -1,0 +1,1032 @@
+{
+  "dataSources": {
+    "ds_MgCYw7Hr": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main source=\"WinEventLog:Security\" EventCode=4726\n| table _time host Account_Name Target_Account_Name\n| rename Target_Account_Name as \"Deleted User\", Account_Name as \"Deleted By\"\n| sort - _time",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Deleted User search"
+    },
+    "ds_3cLaLjwy": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=4624 Logon_Type=10 | table _time host Account_Name src_ip",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "RDP Logins search"
+    },
+    "ds_guoX9bMg": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main (EventCode=4697 OR EventCode=7045) | eval Severity=\"High\" | table _time host EventCode Service_Name Service_file_Name Service_Account Severity | sort -_time",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "New Services Installation search"
+    },
+    "ds_zkoj5Tdm": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main source=\"WinEventLog:Security\" (EventCode=4732 OR EventCode=4720)  | eval Severity=\"Critical\" | table _time host New_Account_Account_Name Group_Name Account_Name Severity | rename New_Account_Account_Name as \"ADDED USER\", Account_Name as \"ADDED BY\" | sort -_time",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "User Added To Administrator Group search"
+    },
+    "ds_6ygTb63F": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main source=\"WinEventLog:Security\" EventCode=4720 | eval Severity=\"High\" | table _time host New_Account_Account_Name Account_Name Severity | rename New_Account_Account_Name as \"New User\", Account_Name as \"Created BY\" | sort - _time",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "New User Accounts Created search"
+    },
+    "ds_mQnCOKcU": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=1 | rex field=Image \"(?<ProcessName>[^\\\\\\\\]+$$)\" | search ProcessName IN(\"powershell.exe\", \"cmd.exe\" \"wmic.exe\",\"rundll32.exe\",\"regsvr32.exe\",\"certutil.exe\",\"mshta.exe\",\"bitsadmin.exe\",\"net.exe\",\"net1.exe\") | table _time host User ProcessName ParentImage CommandLine | sort -_time",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Suspicious LOLBins Execution search"
+    },
+    "ds_G2AT4sOs": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=4625\n| stats dc(Account_Name) as UniqueUsers values(Account_Name) as TargetedUsers count as FailedAttempts by src_ip\n| where UniqueUsers > 1\n| sort - FailedAttempts",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Multiple Users Targeted By SameIP search"
+    },
+    "ds_8NnnYV18": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=1\n| rex field=Image \"(?<ProcessName>[^\\\\\\]+)$$\"\n| stats count by ProcessName\n| sort - count\n| head 10",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Top Executed Process search"
+    },
+    "ds_Q8ep8Cil": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=1 Image=\"*powershell.exe\" | search CommandLine=\"*-ence*\" OR CommandLine=\"*-EncodedCommands*\" OR CommandLine=\"*-e*\" | table _time host User CommandLine ParentImage | sort -_time",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Encoded PowerShell Detection search"
+    },
+    "ds_nRvWcRKu": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=main EventCode=1 Image=\"*powershell.exe\" | table _time Computer User Image CommandLine ParentImage | sort -_time",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Suspicious PowerShell Execution search"
+    },
+    "ds_9iQXrG6t": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4625 | bucket _time span=5m | stats count as FailedAttempts values(src_ip) as SourceIP by _time Account_Name | where FailedAttempts>=5| sort - FailedAttempts",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Potential Brute-Force Detetction search"
+    },
+    "ds_HMzMdZHW": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4624 | stats count by _time Logon_Type Account_Name | sort -count",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Logon Type Logins search 2"
+    },
+    "ds_Btn2fXYk": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4624 \n| stats count by _time Account_Name Logon_type \n|  sort -count",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Logon Type logins search"
+    },
+    "ds_lPqfqcCP": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4625 Source_Network_Address!=\"-\" |stats count as \"Failed Attempts\" by Source_Network_Address | sort -\"Failed Attempts\" | head 10",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Top Source IP Address_FailedLogins_ search"
+    },
+    "ds_cP6EWEw1": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4625 Source_Network_Address!=\"-\" |search Account_Name!=\"ANONYMOUS LOGON\" | stats count as \"Failed Attempts\" by Account_Name | sort -\"Failed Attempts\" | head 10",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Top Failed User-Account search"
+    },
+    "ds_IBuCA61J": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" (EventCode=4625 OR EventCode=4624) | eval AuthenticationStatus=case(EventCode=4624,\"Successful\",EventCode=4625,\"Failed\") | timechart span=5m count by AuthenticationStatus",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Authentication Activity Trend search"
+    },
+    "ds_gez7PbTp": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=* host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4672| table _time ComputerName Account_Name privilege",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Privilege Assigned User search"
+    },
+    "ds_vtIM1KFh": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4740 | table _time ComputerName Account_Locked_Out_Name CallerComputerName",
+        "queryParameters": {
+          "earliest": "-7d@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Locked-out User search"
+    },
+    "ds_8fxIPUiv": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4740 | stats count as \"Account Lockouts\"",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Account Lockouts search"
+    },
+    "ds_sBe8LgP4": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4625 | stats count as \"Failed Logins\"",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Failed Logins search"
+    },
+    "ds_alZxeV3a": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4624 | stats count as \"Successful Logins\"",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Successful Logins search"
+    },
+    "ds_ViaOUsTw": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" (EventCode=4625 OR EventCode=4624) | stats count as \"Authentication Attempts\"",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Total Authentication Attempts search"
+    },
+    "ds_Y0cQojQ0": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" EventCode=4625 | top Account_Name",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Top Failed Users search"
+    },
+    "ds_HWbbkgOH": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" (EventCode=4624 OR EventCode=4625) | eval Status = if(EventCode=4624,\"Success Logins\",\"Failed Attempts\") | stats count by Status",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Success vs Failed search"
+    },
+    "ds_HLOWCuzc": {
+      "type": "ds.search",
+      "options": {
+        "query": "host=\"window10-Target\" source=\"WinEventLog:Security\" (EventCode=4624 OR EventCode=4625) | timechart span=1h count by EventCode",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Login Trend - Column chart search"
+    }
+  },
+  "visualizations": {
+    "viz_9qNn4eX8": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_MgCYw7Hr"
+      },
+      "title": "Deleted User"
+    },
+    "viz_oIkMrOcW": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_guoX9bMg"
+      },
+      "title": "New Services Installation"
+    },
+    "viz_yL5pfS6h": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_zkoj5Tdm"
+      },
+      "title": "User Added To Administrator Group"
+    },
+    "viz_Zp9Bxg0Y": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_6ygTb63F"
+      },
+      "title": "New User Accounts Created"
+    },
+    "viz_BXovoXvb": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_mQnCOKcU"
+      },
+      "title": "Suspicious LOLBins Execution"
+    },
+    "viz_piAcZaWw": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_G2AT4sOs"
+      },
+      "title": "Multiple Users Targeted By SameIP"
+    },
+    "viz_Sldkt6vb": {
+      "type": "splunk.bar",
+      "dataSources": {
+        "primary": "ds_8NnnYV18"
+      },
+      "title": "Top Executed Process"
+    },
+    "viz_McAbzFUp": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_Q8ep8Cil"
+      },
+      "title": "Encoded PowerShell Detection"
+    },
+    "viz_vMjLvFlF": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_nRvWcRKu"
+      },
+      "title": "Suspicious PowerShell Execution"
+    },
+    "viz_zQvAohZp": {
+      "type": "splunk.table",
+      "options": {
+        "count": 100,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_9iQXrG6t"
+      },
+      "title": "Potential Brute-Force Detetction"
+    },
+    "viz_KwHzil1U": {
+      "type": "splunk.table",
+      "options": {
+        "count": 100,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_HMzMdZHW"
+      },
+      "title": "Logon Type Logins"
+    },
+    "viz_5Ndd5ELC": {
+      "type": "splunk.column",
+      "options": {
+        "yAxisAbbreviation": "auto",
+        "y2AxisAbbreviation": "auto",
+        "showRoundedY2AxisLabels": false,
+        "legendTruncation": "ellipsisMiddle",
+        "showY2MajorGridLines": true,
+        "xAxisLabelRotation": 0,
+        "xAxisTitleVisibility": "show",
+        "yAxisTitleVisibility": "show",
+        "y2AxisTitleVisibility": "show",
+        "yAxisScale": "linear",
+        "showOverlayY2Axis": false,
+        "y2AxisScale": "linear",
+        "dataValuesDisplay": "off",
+        "stackMode": "auto",
+        "showSplitSeries": false,
+        "showIndependentYRanges": false,
+        "legendDisplay": "right"
+      },
+      "dataSources": {
+        "primary": "ds_lPqfqcCP"
+      },
+      "title": "Top Source IP Address(FailedLogins)"
+    },
+    "viz_n6jw2YTc": {
+      "type": "splunk.bar",
+      "options": {
+        "yAxisAbbreviation": "auto",
+        "y2AxisAbbreviation": "auto",
+        "showRoundedY2AxisLabels": false,
+        "legendTruncation": "ellipsisMiddle",
+        "showY2MajorGridLines": true,
+        "xAxisTitleVisibility": "show",
+        "yAxisTitleVisibility": "show",
+        "y2AxisTitleVisibility": "show",
+        "yAxisScale": "linear",
+        "dataValuesDisplay": "off",
+        "stackMode": "auto",
+        "showSplitSeries": false,
+        "showIndependentYRanges": false,
+        "legendDisplay": "right"
+      },
+      "dataSources": {
+        "primary": "ds_cP6EWEw1"
+      },
+      "title": "Top Failed User-Account"
+    },
+    "viz_psEuGKEQ": {
+      "type": "splunk.line",
+      "options": {
+        "yAxisAbbreviation": "auto",
+        "y2AxisAbbreviation": "auto",
+        "showRoundedY2AxisLabels": false,
+        "legendTruncation": "ellipsisMiddle",
+        "showY2MajorGridLines": true,
+        "xAxisLabelRotation": 0,
+        "xAxisTitleVisibility": "show",
+        "yAxisTitleVisibility": "show",
+        "y2AxisTitleVisibility": "show",
+        "yAxisScale": "linear",
+        "showOverlayY2Axis": false,
+        "y2AxisScale": "linear",
+        "nullValueDisplay": "gaps",
+        "dataValuesDisplay": "off",
+        "showSplitSeries": false,
+        "showIndependentYRanges": false,
+        "legendMode": "standard",
+        "legendDisplay": "right",
+        "lineWidth": 2
+      },
+      "dataSources": {
+        "primary": "ds_IBuCA61J"
+      },
+      "title": "Authentication Activity Trend"
+    },
+    "viz_YENP8OYB": {
+      "type": "splunk.table",
+      "options": {
+        "count": 50,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_gez7PbTp"
+      },
+      "title": "Privilege Assigned User"
+    },
+    "viz_iEN0m26q": {
+      "type": "splunk.table",
+      "options": {
+        "count": 100,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false
+      },
+      "dataSources": {
+        "primary": "ds_vtIM1KFh"
+      },
+      "title": "Locked-out User"
+    },
+    "viz_vMUzErQB": {
+      "type": "splunk.singlevalue",
+      "options": {
+        "numberPrecision": 0,
+        "sparklineDisplay": "below",
+        "trendDisplay": "absolute",
+        "unitPosition": "after",
+        "shouldUseThousandSeparators": true,
+        "majorColor": "> majorValue | rangeValue(convertedColorRange)"
+      },
+      "context": {
+        "convertedColorRange": [
+          {
+            "from": 200,
+            "value": "#d94e17"
+          },
+          {
+            "from": 100,
+            "to": 200,
+            "value": "#d94e17"
+          },
+          {
+            "from": 70,
+            "to": 100,
+            "value": "#d94e17"
+          },
+          {
+            "from": 30,
+            "to": 70,
+            "value": "#d94e17"
+          },
+          {
+            "from": 0,
+            "to": 30,
+            "value": "#d94e17"
+          },
+          {
+            "to": 0,
+            "value": "#d94e17"
+          }
+        ]
+      },
+      "dataSources": {
+        "primary": "ds_8fxIPUiv"
+      },
+      "title": "Account Lockouts"
+    },
+    "viz_WZpGkRJ6": {
+      "type": "splunk.singlevalue",
+      "options": {
+        "numberPrecision": 0,
+        "sparklineDisplay": "below",
+        "trendDisplay": "absolute",
+        "unitPosition": "after",
+        "shouldUseThousandSeparators": true,
+        "majorColor": "> majorValue | rangeValue(convertedColorRange)"
+      },
+      "context": {
+        "convertedColorRange": [
+          {
+            "from": 200,
+            "value": "#d41f1f"
+          },
+          {
+            "from": 100,
+            "to": 200,
+            "value": "#1182f3"
+          },
+          {
+            "from": 70,
+            "to": 100,
+            "value": "#f1813f"
+          },
+          {
+            "from": 30,
+            "to": 70,
+            "value": "#555"
+          },
+          {
+            "from": 0,
+            "to": 30,
+            "value": "#1182f3"
+          },
+          {
+            "to": 0,
+            "value": "#53a051"
+          }
+        ]
+      },
+      "dataSources": {
+        "primary": "ds_sBe8LgP4"
+      },
+      "title": "Failed Logins"
+    },
+    "viz_ZH59KKlp": {
+      "type": "splunk.singlevalue",
+      "options": {
+        "numberPrecision": 0,
+        "sparklineDisplay": "below",
+        "trendDisplay": "absolute",
+        "unitPosition": "after",
+        "shouldUseThousandSeparators": true,
+        "majorColor": "> majorValue | rangeValue(convertedColorRange)"
+      },
+      "context": {
+        "convertedColorRange": [
+          {
+            "from": 200,
+            "value": "#118832"
+          },
+          {
+            "from": 100,
+            "to": 200,
+            "value": "#1182f3"
+          },
+          {
+            "from": 70,
+            "to": 100,
+            "value": "#f1813f"
+          },
+          {
+            "from": 30,
+            "to": 70,
+            "value": "#555"
+          },
+          {
+            "from": 0,
+            "to": 30,
+            "value": "#1182f3"
+          },
+          {
+            "to": 0,
+            "value": "#53a051"
+          }
+        ]
+      },
+      "dataSources": {
+        "primary": "ds_alZxeV3a"
+      },
+      "title": "Successful Logins"
+    },
+    "viz_jerEHSIf": {
+      "type": "splunk.singlevalue",
+      "options": {
+        "numberPrecision": 0,
+        "sparklineDisplay": "below",
+        "trendDisplay": "absolute",
+        "unitPosition": "after",
+        "shouldUseThousandSeparators": true,
+        "majorColor": "> majorValue | rangeValue(convertedColorRange)"
+      },
+      "context": {
+        "convertedColorRange": [
+          {
+            "from": 200,
+            "value": "#1182f3"
+          },
+          {
+            "from": 100,
+            "to": 200,
+            "value": "#1182f3"
+          },
+          {
+            "from": 70,
+            "to": 100,
+            "value": "#f1813f"
+          },
+          {
+            "from": 30,
+            "to": 70,
+            "value": "#f8be34"
+          },
+          {
+            "from": 0,
+            "to": 30,
+            "value": "#1182f3"
+          },
+          {
+            "to": 0,
+            "value": "#53a051"
+          }
+        ]
+      },
+      "dataSources": {
+        "primary": "ds_ViaOUsTw"
+      },
+      "title": "Total Authentication Attempts"
+    },
+    "viz_Zxwy4GZL": {
+      "type": "splunk.pie",
+      "options": {
+        "collapseThreshold": 0.01
+      },
+      "dataSources": {
+        "primary": "ds_HWbbkgOH"
+      },
+      "title": "Success vs Failed"
+    }
+  },
+  "applicationProperties": {
+    "hideEdit": false,
+    "hideExport": false
+  },
+  "inputs": {
+    "input_global_trp": {
+      "type": "input.timerange",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-7d@h,now"
+      },
+      "title": "Global time range"
+    }
+  },
+  "layout": {
+    "options": {},
+    "globalInputs": [
+      "input_global_trp"
+    ],
+    "tabs": {
+      "items": [
+        {
+          "layoutId": "layout_1",
+          "label": "New tab"
+        }
+      ]
+    },
+    "layoutDefinitions": {
+      "layout_1": {
+        "type": "grid",
+        "structure": [
+          {
+            "item": "viz_jerEHSIf",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "w": 389,
+              "h": 188
+            }
+          },
+          {
+            "item": "viz_WZpGkRJ6",
+            "type": "block",
+            "position": {
+              "x": 389,
+              "y": 0,
+              "w": 367,
+              "h": 188
+            }
+          },
+          {
+            "item": "viz_ZH59KKlp",
+            "type": "block",
+            "position": {
+              "x": 756,
+              "y": 0,
+              "w": 299,
+              "h": 188
+            }
+          },
+          {
+            "item": "viz_vMUzErQB",
+            "type": "block",
+            "position": {
+              "x": 1055,
+              "y": 0,
+              "w": 385,
+              "h": 188
+            }
+          },
+          {
+            "item": "viz_psEuGKEQ",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 188,
+              "w": 1007,
+              "h": 338
+            }
+          },
+          {
+            "item": "viz_Zxwy4GZL",
+            "type": "block",
+            "position": {
+              "x": 1007,
+              "y": 188,
+              "w": 433,
+              "h": 338
+            }
+          },
+          {
+            "item": "viz_5Ndd5ELC",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 526,
+              "w": 504,
+              "h": 299
+            }
+          },
+          {
+            "item": "viz_n6jw2YTc",
+            "type": "block",
+            "position": {
+              "x": 504,
+              "y": 526,
+              "w": 936,
+              "h": 299
+            }
+          },
+          {
+            "item": "viz_piAcZaWw",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 825,
+              "w": 641,
+              "h": 207
+            }
+          },
+          {
+            "item": "viz_Zp9Bxg0Y",
+            "type": "block",
+            "position": {
+              "x": 641,
+              "y": 825,
+              "w": 799,
+              "h": 207
+            }
+          },
+          {
+            "item": "viz_yL5pfS6h",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 1032,
+              "w": 772,
+              "h": 304
+            }
+          },
+          {
+            "item": "viz_iEN0m26q",
+            "type": "block",
+            "position": {
+              "x": 772,
+              "y": 1032,
+              "w": 668,
+              "h": 304
+            }
+          },
+          {
+            "item": "viz_9qNn4eX8",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 1336,
+              "w": 1440,
+              "h": 248
+            }
+          },
+          {
+            "item": "viz_YENP8OYB",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 1584,
+              "w": 1440,
+              "h": 426
+            }
+          },
+          {
+            "item": "viz_KwHzil1U",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 2010,
+              "w": 1440,
+              "h": 282
+            }
+          },
+          {
+            "item": "viz_zQvAohZp",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 2292,
+              "w": 1440,
+              "h": 342
+            }
+          },
+          {
+            "item": "viz_vMjLvFlF",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 2634,
+              "w": 1440,
+              "h": 281
+            }
+          },
+          {
+            "item": "viz_McAbzFUp",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 2915,
+              "w": 1440,
+              "h": 298
+            }
+          },
+          {
+            "item": "viz_Sldkt6vb",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 3213,
+              "w": 1440,
+              "h": 379
+            }
+          },
+          {
+            "item": "viz_BXovoXvb",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 3592,
+              "w": 1440,
+              "h": 363
+            }
+          },
+          {
+            "item": "viz_oIkMrOcW",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 3955,
+              "w": 1440,
+              "h": 320
+            }
+          }
+        ],
+        "options": {
+          "width": 1440,
+          "height": 960
+        }
+      }
+    }
+  },
+  "title": "SOC Analyst-Window Security Monitoring",
+  "description": "",
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {
+          "queryParameters": {
+            "latest": "$global_time.latest$",
+            "earliest": "$global_time.earliest$"
+          }
+        }
+      },
+      "ds.spl2": {
+        "options": {
+          "queryParameters": {
+            "latest": "$global_time.latest$",
+            "earliest": "$global_time.earliest$"
+          }
+        }
+      }
+    },
+    "visualizations": {
+      "global": {
+        "showProgressBar": true
+      }
+    }
+  }
+}
