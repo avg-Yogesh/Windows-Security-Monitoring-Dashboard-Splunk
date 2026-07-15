@@ -22,7 +22,7 @@ index=main EventCode=1
 
 Monitors Sysmon Process Creation events to identify the most frequently executed processes on the system.
 
-
+---
 
 # Suspicious LOLBins
 
