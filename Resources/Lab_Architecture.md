@@ -1,14 +1,20 @@
-Lab Environment
-Component 	Technology Used
-SIEM 	Splunk Enterprise 10.4.0
-Log Collection 	Splunk Universal Forwarder
-Endpoint 	Windows 10 Home
-Attacker Machine 	Kali Linux
-Additional Logging 	Sysmon
-Virtualization 	Oracle VirtualBox
-Operating System (SIEM) 	Ubuntu Linux
-  
+# Lab Environment
 
+| Component | Technology Used |
+|-----------|-----------------|
+| SIEM | Splunk Enterprise 10.4.0|
+| Log Collection | Splunk Universal Forwarder |
+| Endpoint | Windows 10 Home |
+| Attacker Machine | Kali Linux |
+| Additional Logging | Sysmon |
+| Virtualization | Oracle VirtualBox |
+| Operating System (SIEM) | Ubuntu Linux |
+
+---
+
+## ARCHITECTURE
+
+```
 
                 Kali Linux
              (Attack Machine)
@@ -30,3 +36,4 @@ Operating System (SIEM) 	Ubuntu Linux
                       ▼
       Windows Security Monitoring Dashboard
 
+```
